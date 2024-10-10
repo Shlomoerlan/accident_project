@@ -1,5 +1,7 @@
 import pytest
-from service.queries_service import get_total_accidents_by_area, get_total_accidents_by_area_and_period
+from service.queries_service import get_total_accidents_by_area, get_total_accidents_by_area_and_period, \
+    get_injury_statistics_by_area
+
 
 @pytest.fixture(scope="function")
 def daily_test_collection(init_test_data):
@@ -36,3 +38,14 @@ def test_get_total_accidents_by_area_and_period_no_accidents():
     period = "month"
     result = get_total_accidents_by_area_and_period(area, date, period)
     assert result == 0
+
+def test_get_injury_statistics_by_area():
+    area = "1654"
+    result = get_injury_statistics_by_area(area)
+    total_injuries = result['total_injuries']
+    assert total_injuries > 0
+    fatal_injuries = result['fatal_injuries']
+    assert fatal_injuries > 0
+    non_fatal_injuries = result['non_fatal_injuries']
+    assert non_fatal_injuries > 0
+
