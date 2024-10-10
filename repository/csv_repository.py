@@ -4,12 +4,14 @@ from pymongo import UpdateOne
 from database.connect import daily_collection, monthly_collection
 from utils.useable_functions import safe_int
 
-csv_file_path = './data/accident_data.csv'
+csv_file_path = './data/traffic_crashes_data.csv'
+csv_file_path_small_data = './data/accident_data.csv'
 
 def insert_data_to_mongo_bulk(csv_file_path=csv_file_path):
     with open(csv_file_path, mode='r') as file:
         reader = csv.DictReader(file)
-
+        daily_collection.drop()
+        monthly_collection.drop()
         daily_bulk_ops = []
         monthly_bulk_ops = []
 
@@ -95,8 +97,3 @@ def insert_data_to_mongo_bulk(csv_file_path=csv_file_path):
             daily_collection.bulk_write(daily_bulk_ops)
         if monthly_bulk_ops:
             monthly_collection.bulk_write(monthly_bulk_ops)
-
-
-    # daily_collection.create_index([('CRASH_DATE', 1)])
-    # daily_collection.create_index([('AREA', 1)])
-    # daily_collection.create_index([('PRIM_CONTRIBUTORY_CAUSE', 1)])

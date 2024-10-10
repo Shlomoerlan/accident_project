@@ -36,8 +36,19 @@ def create_index_get_accidents_by_cause():
     .explain()['executionStats'])
     return executionStats, executionStats_without_index
 
+def create_index_get_injury_statistics_by_area():
+    daily_collection.create_index({'FATAL_INJURIES': 1})
+    executionStats = (daily_collection
+    .find({'FATAL_INJURIES': 3})
+    .hint({'FATAL_INJURIES': 1})
+    .explain()['executionStats'])
+    executionStats_without_index = (daily_collection
+    .find({'FATAL_INJURIES': 3})
+    .hint({'$natural': 1})
+    .explain()['executionStats'])
+    return executionStats, executionStats_without_index
 
-res1, res2 = create_index_get_accidents_by_cause()
+res1, res2 = create_index_get_injury_statistics_by_area()
 print(res1)
 print(res2)
 

@@ -64,41 +64,22 @@ def get_accidents_by_cause(area):
 
 def get_injury_statistics_by_area(area_code):
     pipeline = [
-        {
-            "$match": {
-                f"AREA.{area_code}": {"$exists": True}
-            }
-        },
-        {
-            "$group": {
-                "_id": None,
-                "total_injuries": {
-                    "$sum": {
+        { "$match": { f"AREA.{area_code}": {"$exists": True}}},
+        { "$group": { "_id": None, "total_injuries": {"$sum": {
                         "$add": [
                             "$INJURIES.FATAL_INJURIES",
                             "$INJURIES.INCAPACITATING_INJURIES",
                             "$INJURIES.NON_INCAPACITATING_INJURIES"
-                        ]
-                    }
-                },
-                "fatal_injuries": {
-                    "$sum": "$INJURIES.FATAL_INJURIES"
-                },
-                "non_fatal_injuries": {
-                    "$sum": {
-                        "$add": ["$INJURIES.INCAPACITATING_INJURIES", "$INJURIES.NON_INCAPACITATING_INJURIES"]
-                    }
-                },
+                        ]}}, "fatal_injuries": { "$sum": "$INJURIES.FATAL_INJURIES" },
+        "non_fatal_injuries": { "$sum": { "$add": ["$INJURIES.INCAPACITATING_INJURIES", "$INJURIES.NON_INCAPACITATING_INJURIES"] }},
             }
         }
     ]
 
     result = list(daily_collection.aggregate(pipeline))
-
     if result:
         data = result[0]
         return data
-
     return {
         "total_injuries": 0,
         "fatal_injuries": 0,
