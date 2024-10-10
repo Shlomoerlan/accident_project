@@ -10,7 +10,6 @@ if __name__ == '__main__':
     #insert_data_to_mongo_bulk()
     app.register_blueprint(initiate_blueprint, url_prefix="/api/initiate")
     app.register_blueprint(queries_blueprint, url_prefix="/api/queries")
-    print(list(daily_collection.find()))
     app.run(debug=True)
 
 

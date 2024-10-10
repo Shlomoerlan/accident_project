@@ -1,8 +1,8 @@
 from datetime import datetime
 
 from flask import jsonify, request, Blueprint
-from service.queries_service import get_total_accidents_by_area, get_accidents_by_period_and_area, \
-    get_total_accidents_by_area_and_period
+from service.queries_service import get_total_accidents_by_area, get_total_accidents_by_area_and_period, \
+    get_accidents_by_cause
 
 queries_blueprint = Blueprint('queries', __name__)
 
@@ -32,4 +32,17 @@ def total_accidents_area_period():
                         "total_accidents": total_accidents}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
-# GET /accidents/area/period?area=123&period=month&date=2024-10-10
+
+
+@queries_blueprint.route('/accidents/cause', methods=['GET'])
+
+def accidents_by_cause():
+    area = request.args.get('area')
+    if not area:
+        return jsonify({"status": "error", "message": "Missing 'area' parameter"}), 400
+
+    try:
+        accidents = get_accidents_by_cause(area)
+        return jsonify({"status": "success", "area": area, "accidents": accidents}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
