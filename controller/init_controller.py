@@ -1,5 +1,4 @@
 from flask import Blueprint, jsonify
-
 from repository.csv_repository import insert_data_to_mongo
 
 initiate_blueprint = Blueprint('initiate', __name__)
