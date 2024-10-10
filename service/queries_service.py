@@ -3,20 +3,16 @@ from toolz import pipe
 from database.connect import daily_collection, monthly_collection
 from repository.week_repository import get_week_range
 
-
 def get_total_accidents_by_area(area):
     pipeline = [
         {"$match": {f"AREA.{area}": {"$exists": True}}},
         {"$group": {"_id": None, "total_accidents": {"$sum": f"$AREA.{area}"}}}
     ]
-
     result = list(daily_collection.aggregate(pipeline))
-
     if result:
         return result[0]['total_accidents']
     else:
         return 0
-
 
 def calculate_period(date, period):
     date_obj = datetime.strptime(date, '%Y-%m-%d')
@@ -40,7 +36,6 @@ def get_total_accidents_by_area_and_period(area, date, period):
         end = end.strftime('%Y-%m-%d')
         collection = daily_collection
         date_field = 'CRASH_DATE'
-
     pipeline = [
         {"$match": {date_field: {"$gte": start, "$lt": end}}},
         {"$project": {f"AREA.{area}": 1}},
@@ -50,30 +45,65 @@ def get_total_accidents_by_area_and_period(area, date, period):
     result = list(collection.aggregate(pipeline))
     return pipe(result, lambda r: r[0]['total_accidents'] if r else 0)
 
-
 def get_accidents_by_cause(area):
     pipeline = [
-        {"$match": {f"AREA.{area}": {"$exists": True}}},  # סינון לפי אזור
-        {"$unwind": "$PRIM_CONTRIBUTORY_CAUSE"},  # פתיחת הסיבות העיקריות
+        {"$match": {f"AREA.{area}": {"$exists": True}}},
+        {"$unwind": "$PRIM_CONTRIBUTORY_CAUSE"},
         {"$group": {
-            "_id": "$PRIM_CONTRIBUTORY_CAUSE",  # קיבוץ לפי סיבה עיקרית
-            "total_accidents": {"$sum": f"$AREA.{area}"}  # סיכום התאונות לכל סיבה
+            "_id": "$PRIM_CONTRIBUTORY_CAUSE",
+            "total_accidents": {"$sum": f"$AREA.{area}"}
         }},
-        {"$sort": {"total_accidents": -1}}  # מיון לפי סך התאונות בסדר יורד
+        {"$sort": {"total_accidents": -1}}
     ]
-
     result = list(daily_collection.aggregate(pipeline))
-
-    # התאמה לפורמט מצומצם
     simplified_result = [
         {"cause": entry["_id"], "total_accidents": entry["total_accidents"]}
         for entry in result
     ]
-
     return simplified_result
 
+def get_injury_statistics_by_area(area_code):
+    pipeline = [
+        {
+            "$match": {
+                f"AREA.{area_code}": {"$exists": True}
+            }
+        },
+        {
+            "$group": {
+                "_id": None,
+                "total_injuries": {
+                    "$sum": {
+                        "$add": [
+                            "$INJURIES.FATAL_INJURIES",
+                            "$INJURIES.INCAPACITATING_INJURIES",
+                            "$INJURIES.NON_INCAPACITATING_INJURIES"
+                        ]
+                    }
+                },
+                "fatal_injuries": {
+                    "$sum": "$INJURIES.FATAL_INJURIES"
+                },
+                "non_fatal_injuries": {
+                    "$sum": {
+                        "$add": ["$INJURIES.INCAPACITATING_INJURIES", "$INJURIES.NON_INCAPACITATING_INJURIES"]
+                    }
+                },
+            }
+        }
+    ]
 
+    result = list(daily_collection.aggregate(pipeline))
 
+    if result:
+        data = result[0]
+        return data
 
-
+    return {
+        "total_injuries": 0,
+        "fatal_injuries": 0,
+        "non_fatal_injuries": 0,
+        "fatal_events": [],
+        "non_fatal_events": []
+    }
 

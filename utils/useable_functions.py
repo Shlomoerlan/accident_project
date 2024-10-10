@@ -1,5 +1,3 @@
-
-
 def safe_int(value) -> int:
     try:
         return int(value)

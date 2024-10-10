@@ -1,5 +1,4 @@
 import pytest
-from database.connect import client
 from service.queries_service import get_total_accidents_by_area, get_total_accidents_by_area_and_period
 
 @pytest.fixture(scope="function")

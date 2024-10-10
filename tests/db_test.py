@@ -1,6 +1,5 @@
 from database.connect import daily_collection, monthly_collection
-from repository.csv_repository import insert_data_to_mongo, insert_data_to_mongo_bulk
-
+from repository.csv_repository import insert_data_to_mongo_bulk
 
 def test_insert_data_to_mongo():
     insert_data_to_mongo_bulk()

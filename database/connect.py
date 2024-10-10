@@ -5,3 +5,4 @@ db = client['car_accidents_db']
 
 daily_collection = db['daily_accidents']
 monthly_collection = db['monthly_accidents']
+accident_collection = db['accident_db']
